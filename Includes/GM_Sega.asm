@@ -69,6 +69,7 @@ Sega_WaitLoop:
 		beq.s	.goto_title				; branch if timer hits 0
 		andi.b	#btnStart,(v_joypad_press_actual).w	; is Start button pressed?
 		beq.s	Sega_WaitLoop				; if not, branch
+		jsr		MegaPCM_StopPlayback
 
 	.goto_title:
 		move.b	#id_Title,(v_gamemode).w		; go to title screen
