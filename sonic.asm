@@ -121,6 +121,13 @@ GameInit:
 		jsr	VDPSetupGame				; clear CRAM and set VDP registers
 		bsr.w	JoypadInit				; initialise joypads
 		move.b	#id_Sega,(v_gamemode).w			; set Game Mode to Sega Screen
+		jsr     MegaPCM_LoadDriver
+		lea     SampleTable, a0
+		jsr     MegaPCM_LoadSampleTable
+		tst.w   d0                      ; was sample table loaded successfully?
+		beq.s   .SampleTableOk          ; if yes, branch
+		illegal
+.SampleTableOk:
 
 MainGameLoop:
 		move.b	(v_gamemode).w,d0			; load gamemode

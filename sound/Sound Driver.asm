@@ -142,21 +142,11 @@ DACUpdateTrack:
 		move.b	ch_Sample(a5),d0			; Get sample
 		cmpi.b	#nR,d0					; Is it a rest?
 		beq.s	.locret					; Return if yes
-		btst	#3,d0					; Is bit 3 set (samples between $88-$8F)?
-		bne.s	.timpani				; Various timpani
-		move.b	d0,(z80_dac_sample).l
+		MPCM_stopZ80
+		move.b  d0, MPCM_Z80_RAM+Z_MPCM_CommandInput    ; send DAC sample to Mega PCM
+		MPCM_startZ80
 
 .locret:
-		rts
-; ===========================================================================
-
-.timpani:
-		subi.b	#$88,d0					; Convert into an index
-		move.b	DAC_sample_rate(pc,d0.w),d0
-		; Warning: this affects the raw pitch of sample $83, meaning it will
-		; use this value from then on.
-		move.b	d0,(z80_dac3_pitch).l
-		move.b	#$83,(z80_dac_sample).l			; Use timpani
 		rts
 
 ; ===========================================================================
@@ -545,20 +535,8 @@ Sound_ExIndex:
 ; ---------------------------------------------------------------------------
 
 SoundCmd_Sega:
-		move.b	#$88,(z80_dac_sample).l			; Queue Sega PCM
-		move.w	#$11,d1
-
-.busyloop_outer:
-		move.w	#-1,d0
-
-.busyloop:
-		nop
-		dbf	d0,.busyloop
-
-		dbf	d1,.busyloop_outer
-
-		addq.w	#4,sp					; Tamper return value so we don't return to caller
-		rts
+		moveq   #$FFFFFF8C, d0          ; request SEGA PCM sample
+		jmp     MegaPCM_PlaySample
 
 ; ---------------------------------------------------------------------------
 ; Play music track $81-$9F
@@ -1461,54 +1439,50 @@ WriteFMIorIIMain:
 		rts
 
 WriteFMIorII:
-		btst	#2,ch_Type(a5)				; Is this bound for part I or II?
-		bne.s	WriteFMIIPart				; Branch if for part II
-		add.b	ch_Type(a5),d0				; Add in voice control bits
+		move.b  ch_Type(a5), d2
+		subq.b  #4, d2                          ; Is this bound for part I or II?
+		bcc.s   WriteFMIIPart                   ; If yes, branch
+		addq.b  #4, d2                          ; Add in voice control bits
+		add.b   d2, d0                          ;
 
-; Strangely, despite this driver being SMPS 68k Type 1b,
-; WriteFMI and WriteFMII are the Type 1a versions.
-; In Sonic 1's prototype, they were the Type 1b versions.
-; I wonder why they were changed?
-
+; ---------------------------------------------------------------------------
 WriteFMI:
-		move.b	(ym2612_a0).l,d2
-		btst	#7,d2					; Is FM busy?
-		bne.s	WriteFMI				; Loop if so
-		move.b	d0,(ym2612_a0).l
+		MPCM_stopZ80
+		MPCM_ensureYMWriteReady
+.waitLoop:      tst.b   (ym2612_a0).l           ; is FM busy?
+		bmi.s   .waitLoop               ; branch if yes
+		move.b  d0, (ym2612_a0).l
+		nop
+		move.b  d1, (ym2612_d0).l
 		nop
 		nop
-		nop
-
-.waitloop:
-		move.b	(ym2612_a0).l,d2
-		btst	#7,d2					; Is FM busy?
-		bne.s	.waitloop				; Loop if so
-
-		move.b	d1,(ym2612_d0).l
+.waitLoop2:     tst.b   (ym2612_a0).l           ; is FM busy?
+		bmi.s   .waitLoop2              ; branch if yes
+		move.b  #$2A, (ym2612_a0).l     ; restore DAC output for Mega PCM
+		MPCM_startZ80
 		rts
+; End of function WriteFMI
 
 ; ===========================================================================
-
+; loc_7275A:
 WriteFMIIPart:
-		move.b	ch_Type(a5),d2				; Get voice control bits
-		bclr	#2,d2					; Clear chip toggle
-		add.b	d2,d0					; Add in to destination register
+		add.b   d2,d0                   ; Add in to destination register
 
+; ---------------------------------------------------------------------------
 WriteFMII:
-		move.b	(ym2612_a0).l,d2
-		btst	#7,d2					; Is FM busy?
-		bne.s	WriteFMII				; Loop if so
-		move.b	d0,(ym2612_a1).l
+		MPCM_stopZ80
+		MPCM_ensureYMWriteReady
+.waitLoop:      tst.b   (ym2612_a0).l           ; is FM busy?
+		bmi.s   .waitLoop               ; branch if yes
+		move.b  d0, (ym2612_a1).l
+		nop
+		move.b  d1, (ym2612_d1).l
 		nop
 		nop
-		nop
-
-.waitloop:
-		move.b	(ym2612_a0).l,d2
-		btst	#7,d2					; Is FM busy?
-		bne.s	.waitloop				; Loop if so
-
-		move.b	d1,(ym2612_d1).l
+.waitLoop2:     tst.b   (ym2612_a0).l           ; is FM busy?
+		bmi.s   .waitLoop2              ; branch if yes
+		move.b  #$2A, (ym2612_a0).l     ; restore DAC output for Mega PCM
+		MPCM_startZ80
 		rts
 
 ; ---------------------------------------------------------------------------

@@ -10,8 +10,6 @@
 		cpu	z80					; also start a new z80 program
 		phase	0
 
-SEGA_PCM:	equ SegaPCM
-SEGA_PCM_Len:	equ filesize("\SegaPCM_File")
 SEGA_PCM_Pitch:	equ 0Bh						; the pitch of the SEGA sound
 
 		rsset 1FFCh					; extra RAM variables

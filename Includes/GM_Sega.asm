@@ -60,7 +60,7 @@ Sega_PaletteLoop:
 		play_sound cmd_Sega				; play "SEGA" sound
 		move.b	#id_VBlank_Sega_SkipLoad,(v_vblank_routine).w
 		bsr.w	WaitForVBlank
-		move.w	#30,(v_countdown).w			; set timer to 0.5 seconds
+		move.w	#$1E+2*60,(v_countdown).w			; set timer to like 2.5 seconds idk (was #30)
 
 Sega_WaitLoop:
 		move.b	#id_VBlank_Sega,(v_vblank_routine).w

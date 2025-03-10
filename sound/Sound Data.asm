@@ -152,15 +152,10 @@ SoundPriorities:
 ; Include the actual sound driver program
 ; ---------------------------------------------------------------------------
 
+		include "sound/MegaPCM.asm"
+		include "sound/SampleTable.asm"
+
 		include "sound/Sound Driver.asm"
-
-; ---------------------------------------------------------------------------
-; Patch and include the kosinski compressed DAC driver
-; ---------------------------------------------------------------------------
-
-Kos_DacDriver:
-		include	"sound\DAC Driver.asm"
-	Kos_DacDriver_end:
 
 ; ---------------------------------------------------------------------------
 ; Music file includes
@@ -210,22 +205,3 @@ sfxfile_\name:	include	"sound/sfx/\name\.s"			; include the sfx file itself
 
 		SpecSfxFiles	IncludeSfx			; generate includes for all the files
 
-; ---------------------------------------------------------------------------
-; SEGA PCM include
-;
-; To change the file that is included, go to "Sound Equates.asm"!
-; ---------------------------------------------------------------------------
-
-		; check that SEGA PCM is not larger than a z80 bank
-		if filesize("\SegaPCM_File") > $8000
-		inform 3,"Sega sound must fit within $8000 bytes, but its size is $%h bytes.", filesize("\SegaPCM_File")
-		endc
-
-		; Don't let Sega sample cross $8000-byte boundary (DAC driver doesn't switch banks automatically)
-		if (*&$7FFF) + filesize("\SegaPCM_File") > $8000
-		align $8000
-		endc
-; ---------------------------------------------------------------------------
-
-SegaPCM:	incbin	"\SegaPCM_File"				; include the actual Sega PCM data
-		even
