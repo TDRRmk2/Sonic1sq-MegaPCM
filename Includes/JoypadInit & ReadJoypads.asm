@@ -5,13 +5,10 @@
 ; ---------------------------------------------------------------------------
 
 JoypadInit:
-		stopZ80
-		waitZ80
 		moveq	#$40,d0
 		move.b	d0,(port_1_control).l			; set TH pin of port 1 to write, other pins to read
 		move.b	d0,(port_2_control).l			; set TH pin of port 2 to write, other pins to read
 		move.b	d0,(port_e_control).l			; set TH pin of expansion port to write, other pins to read
-		startZ80
 		rts
 
 ; ---------------------------------------------------------------------------

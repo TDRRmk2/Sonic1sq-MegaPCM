@@ -21,10 +21,6 @@ EntryPoint:
 		moveq	#0,d0					; clear d0
 		movea.l	d0,a0					; clear a0
 		move.l	a0,usp					; set usp to $0
-
-		stopZ80						; stop the Z80
-		resetZ80_release				; reset	the Z80
-		waitZ80						; wait for Z80 to stop
 		
 		lea	Z80_Startup(pc),a0
 		lea	(z80_ram).l,a1
@@ -32,10 +28,6 @@ EntryPoint:
 	.loadz80:
 		move.b	(a0)+,(a1)+				; load the Z80_Startup program byte by byte to Z80 RAM
 		dbf	d0,.loadz80
-
-		resetZ80_assert
-		startZ80					; start	the Z80
-		resetZ80_release				; reset	the Z80
 
 		lea	($FF0000).l,a0
 		moveq	#0,d0
@@ -64,7 +56,6 @@ EntryPoint:
 		move.b	#$DF,(psg_input).l
 		move.b	#$FF,(psg_input).l
 
-		resetZ80_assert
 		moveq	#0,d0
 		moveq	#0,d1
 		moveq	#0,d2

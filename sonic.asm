@@ -119,7 +119,6 @@ GameInit:
 		dbf	d1,.loop				; clear RAM up to v_keep_after_reset
 
 		jsr	VDPSetupGame				; clear CRAM and set VDP registers
-		bsr.w	DacDriverLoad
 		bsr.w	JoypadInit				; initialise joypads
 		move.b	#id_Sega,(v_gamemode).w			; set Game Mode to Sega Screen
 

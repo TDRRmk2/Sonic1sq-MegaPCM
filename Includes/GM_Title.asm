@@ -6,7 +6,6 @@ GM_Title:
 		play_stop					; stop music
 		bsr.w	PaletteFadeOut				; fade from previous gamemode to black
 		disable_ints
-		bsr.w	DacDriverLoad
 		lea	(vdp_control_port).l,a6
 		move.w	#vdp_md_color,(a6)			; normal colour mode
 		move.w	#vdp_fg_nametable+(vram_fg>>10),(a6)	; set foreground nametable address

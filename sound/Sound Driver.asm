@@ -4,24 +4,6 @@
 ; ---------------------------------------------------------------------------
 
 UpdateSound:
-		stopZ80
-		nop
-		nop
-		nop
-		waitZ80
-
-		btst	#7,(z80_dac_status).l			; Is DAC accepting new samples?
-		beq.s	.driverinput				; Branch if yes
-		startZ80
-		nop
-		nop
-		nop
-		nop
-		nop
-		bra.s	UpdateSound
-; ===========================================================================
-
-.driverinput:
 		lea	(v_snddriver_ram&$FFFFFF).l,a6
 		clr.b	v_channel_mode(a6)
 		tst.b	f_pause_sound(a6)			; is music paused?
@@ -117,7 +99,6 @@ UpdateSound:
 		jsr	PSGUpdateTrack(pc)
 
 DoStartZ80:
-		startZ80
 		rts
 
 ; ---------------------------------------------------------------------------
@@ -565,7 +546,6 @@ Sound_ExIndex:
 
 SoundCmd_Sega:
 		move.b	#$88,(z80_dac_sample).l			; Queue Sega PCM
-		startZ80
 		move.w	#$11,d1
 
 .busyloop_outer:
@@ -1853,7 +1833,6 @@ SongCom_RestoreSong:
 		move.b	#$80,f_fadein_flag(a6)			; Trigger fade-in
 		move.b	#$28,v_fadein_counter(a6)		; Fade-in delay
 		clr.b	f_has_backup(a6)
-		startZ80
 		addq.w	#8,sp					; Tamper return value so we don't return to caller
 		rts
 ; ===========================================================================

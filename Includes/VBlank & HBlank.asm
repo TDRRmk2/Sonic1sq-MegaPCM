@@ -68,11 +68,8 @@ VBlank_Lag:
 
 	.notPAL:
 		move.b	#1,(f_hblank_pal_change).w		; set flag to let HBlank know a frame has finished
-		stopZ80
-		waitZ80
 		bsr.w	UpdatePalette
 		move.w	(v_vdp_hint_counter).w,(a6)		; set water palette position by sending VDP register $8Axx to control port (vdp_control_port)
-		startZ80
 		bra.w	VBlank_Music
 ; ===========================================================================
 
@@ -110,8 +107,6 @@ VBlank_Pause:
 
 ; GM_Level> Level_MainLoop, Level_FDLoop, Level_DelayLoop
 VBlank_Level:
-		stopZ80
-		waitZ80
 		jsr	(ReadJoypads).w
 		bsr.w	UpdatePalette
 		move.w	(v_vdp_hint_counter).w,(a6)		; set water palette position by sending VDP register $8Axx to control port (vdp_control_port)
@@ -119,7 +114,6 @@ VBlank_Level:
 		dma	v_hscroll_buffer,sizeof_vram_hscroll,vram_hscroll
 		dma	v_sprite_buffer,sizeof_vram_sprites,vram_sprites
 		jsr	(ProcessDMA).w
-		startZ80
 		movem.l	(v_camera_x_pos).w,d0-d7		; copy all camera & bg x/y positions to d0-d7
 		movem.l	d0-d7,(v_camera_x_pos_copy).w		; create duplicates in RAM
 		movem.l	(v_fg_redraw_direction).w,d0-d1		; copy all fg/bg redraw direction flags to d0-d1
@@ -148,15 +142,12 @@ DrawTiles_LevelGfx_HUD_PLC:
 
 ; GM_Special> SS_MainLoop
 VBlank_Special:
-		stopZ80
-		waitZ80
 		jsr	(ReadJoypads).w
 		jsr	(PalCycle_SS).w				; update cycling palette
 		bsr.w	UpdatePalette
 		dma	v_sprite_buffer,sizeof_vram_sprites,vram_sprites
 		dma	v_hscroll_buffer,sizeof_vram_hscroll,vram_hscroll
 		jsr	(ProcessDMA).w
-		startZ80
 		tst.w	(v_countdown).w
 		beq.w	.end
 		subq.w	#1,(v_countdown).w			; decrement timer
@@ -169,15 +160,12 @@ VBlank_Special:
 ; GM_Ending> End_LoadSonic (once), End_MainLoop
 VBlank_TitleCard:
 VBlank_Ending:
-		stopZ80
-		waitZ80
 		jsr	(ReadJoypads).w
 		bsr.w	UpdatePalette
 		move.w	(v_vdp_hint_counter).w,(a6)		; set water palette position by sending VDP register $8Axx to control port (vdp_control_port)
 		dma	v_hscroll_buffer,sizeof_vram_hscroll,vram_hscroll
 		dma	v_sprite_buffer,sizeof_vram_sprites,vram_sprites
 		jsr	(ProcessDMA).w
-		startZ80
 		movem.l	(v_camera_x_pos).w,d0-d7		; copy all camera & bg x/y positions to d0-d7
 		movem.l	d0-d7,(v_camera_x_pos_copy).w		; create duplicates in RAM
 		movem.l	(v_fg_redraw_direction).w,d0-d1		; copy all fg/bg redraw direction flags to d0-d1
@@ -195,14 +183,11 @@ VBlank_Fade:
 
 ; GM_Special> SS_FinLoop; GM_Continue> Cont_MainLoop
 VBlank_Continue:
-		stopZ80
-		waitZ80
 		jsr	(ReadJoypads).w
 		bsr.w	UpdatePalette
 		dma	v_sprite_buffer,sizeof_vram_sprites,vram_sprites
 		dma	v_hscroll_buffer,sizeof_vram_hscroll,vram_hscroll
 		jsr	(ProcessDMA).w
-		startZ80
 		tst.w	(v_countdown).w
 		beq.w	.end
 		subq.w	#1,(v_countdown).w			; decrement timer
@@ -213,13 +198,10 @@ VBlank_Continue:
 
 ; Pause_Debug
 VBlank_PauseDebug:
-		stopZ80
-		waitZ80
 		jsr	(ReadJoypads).w
 		bsr.w	UpdatePalette
 		dma	v_sprite_buffer,sizeof_vram_sprites,vram_sprites
 		jsr	(ProcessDMA).w
-		startZ80
 		rts
 
 ; ---------------------------------------------------------------------------
@@ -227,13 +209,10 @@ VBlank_PauseDebug:
 ; ---------------------------------------------------------------------------
 
 ReadPad_Palette_Sprites_HScroll:
-		stopZ80
-		waitZ80
 		jsr	(ReadJoypads).w
 		bsr.s	UpdatePalette
 		dma	v_sprite_buffer,sizeof_vram_sprites,vram_sprites
 		dma	v_hscroll_buffer,sizeof_vram_hscroll,vram_hscroll
-		startZ80
 		rts
 
 ; ---------------------------------------------------------------------------
